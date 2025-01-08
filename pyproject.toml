@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "fetch"
+version = "0.1.0"
+description = "kde bash fetch script"
+authors = ["banakh"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+[tool.poetry.scripts]
+fetch = "src.fetch:main"
+install = "src.install:main"
+uninstall = "src.uninstall:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
