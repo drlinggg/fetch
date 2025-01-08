@@ -1,9 +1,12 @@
 # fetch 
-## default usage
-![image](https://github.com/user-attachments/assets/c909ff20-fb35-41a6-8004-138367a81628)
-## or you can change gradient variable
+![image](https://github.com/user-attachments/assets/16aff500-2c28-4025-8f5f-6c5966f135ca)
+![image](https://github.com/user-attachments/assets/87dff666-bae5-47c0-8421-44d57b6bf8a9)
+![image](https://github.com/user-attachments/assets/643b8b0d-04cd-451a-a58d-c16b59e432de)
 
-![image](https://github.com/user-attachments/assets/108c964d-4dd7-4a37-9310-44856e95b571)
+## parameters 
+- set-color
+- change-ascii
+
 ```
 git clone github.com/drlinggg/fetch 
 cd fetch
@@ -12,5 +15,5 @@ poetry run install
 export PATH="$HOME/.local/bin:$PATH"
 fetch
 ```
-you can set rgb natively or use konsole colorscheme 
+you can set different rgb, ascii and gradient if you want
 бтв у меня арчлинукс
