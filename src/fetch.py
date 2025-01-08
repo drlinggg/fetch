@@ -1,9 +1,10 @@
-import os
-import subprocess
 import json
+import os
+import sys
+import subprocess
 from pathlib import Path
 
-art = [
+arts = [[
     "                  ▄",
     "                 ▟█▙",
     "                ▟███▙",
@@ -22,8 +23,53 @@ art = [
     "   ▟██████████▛        ▜█████████▙",
     "  ▟██████▀▀▀              ▀▀██████▙",
     " ▟███▀▘                       ▝▀███▙",
-    "▟▛▀                               ▀▜▙"
+    "▟▛▀                               ▀▜▙"]
+    ,
+    [
+    '       .',
+    '      /#\\ ',
+    '     /###\\ ',
+    '    /p^###\\ ',
+    '   /##P^q##\\ ',
+    '  /##(   )##\\ ',
+    ' /###P   q#,^\\ ',
+    '/P^         ^q\\ '
+   ]
 ]
+
+i = 0
+
+def change_ascii():
+    global i
+    i = 0
+    print("Press 'a' or 'd' to switch ascii. Press enter to save")
+    while True:
+        os.system('clear')
+        print(f"current: {i}")
+        for line in arts[i]:
+            print(line)
+        arrow = input()
+        if arrow == 'd':
+             i = (i + 1) % len(arts)
+        elif arrow == 'a':
+            i = (i - 1) % len(arts)
+        elif arrow == '':
+           save_ascii_index(i)
+           break
+
+
+def save_ascii_index(index):
+    script_dir = Path(__file__).resolve().parent
+    data_file_path = script_dir / "data.json"
+    try:
+        with open(data_file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = {}
+    data['asciilogo'] = index
+    with open(data_file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+    print(f"Saved ascii logo index: {index}")
 
 class RGB:
     def __init__(self, *args):
@@ -92,7 +138,13 @@ def set_color():
                         break
 
             if color2_value is not None:
-                data = {'color': color2_value}
+                try:
+                    with open(data_file_path, 'r', encoding='utf-8') as file:
+                        data = json.load(file)
+                except FileNotFoundError:
+                    data = {}
+
+                data['color'] = color2_value
                 with open(data_file_path, 'w', encoding='utf-8') as json_file:
                     json.dump(data, json_file, ensure_ascii=False, indent=4)
                 print(f"Color found: {color2_value}, written to {data_file_path}")
@@ -137,9 +189,12 @@ def get_memory_usage():
 def get_uptime_hours_minutes():
     uptime_command = "uptime -p"
     uptime_result = subprocess.run(uptime_command, shell=True, capture_output=True, text=True)
-    return uptime_result.stdout.strip()
+    return uptime_result.stdout.strip()[3:]
 
-def fetch(rgb_instance, gradient):
+def fetch(rgb_instance, gradient, asciilogo):
+
+    art = arts[asciilogo]
+
     os_command = "grep PRETTY_NAME /etc/os-release | awk -F = '{ print $2 }' | sed -e 's/\"//g'"
     os_result = subprocess.run(os_command, shell=True, capture_output=True, text=True)
 
@@ -154,8 +209,8 @@ def fetch(rgb_instance, gradient):
 
     info = []
     info.append(colored_string("OS: ", rgb_instance) + os_result.stdout.strip())
-    info.append(colored_string("Memory Usage (MB): ", rgb_instance) + memory_usage)
-    info.append(colored_string(uptime, rgb_instance))
+    info.append(colored_string("RAM (MB): ", rgb_instance) + memory_usage)
+    info.append(colored_string("Uptime: ", rgb_instance) + uptime)
     info.append(colored_string("Packages: ", rgb_instance) + packages_result.stdout.strip())
 
     rgbs_logo = get_gradient(rgb_instance, len(art))
@@ -170,20 +225,32 @@ def fetch(rgb_instance, gradient):
     print()
 
 def main():
+
+    if (len(sys.argv) > 1):
+        args = sys.argv[1:]
+
+        if (args[0] == 'set-color'):
+            set_color()
+        elif (args[0] == 'change-ascii'):
+            change_ascii()
+
     script_dir = Path(__file__).resolve().parent
     data_file_path = script_dir / "data.json"
 
     if not data_file_path.is_file():
+        change_ascii()
         set_color()
 
     with open(data_file_path, 'r') as data:
         json_data = json.load(data)
+
         color_string = json_data['color']
         values = color_string.split(',')
         color = RGB(values)
-        gradient_string = json_data['gradient']
-        value = gradient_string
-    fetch(color, value)
+        gradient = json_data['gradient']
+        asciilogo = int(json_data['asciilogo'])
+
+    fetch(color, gradient, asciilogo)
 
 
 if __name__ == "__main__":
