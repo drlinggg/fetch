@@ -87,9 +87,10 @@ class RGB:
 def colored_string(string, rgb):
     return f"\033[38;2;{rgb.r};{rgb.g};{rgb.b}m{string}\033[0m"
 
-def get_gradient(rgb, count, step = 13):
+def get_gradient(rgb, count):
     r, g, b = rgb.r, rgb.g, rgb.b
     gradient = []
+    step = int(300/count)
 
     for i in range(-count//2, count//2):
         new_r = max(0, min(255, r - i * step))
@@ -126,7 +127,7 @@ def set_color():
 
                 for line in lines:
                     line = line.strip()
-                    if line == "[Color2]":
+                    if line == "[Color6]":
                         in_color2_section = True
                         continue
                     elif line.startswith("["):
@@ -159,18 +160,33 @@ def set_color():
     elif color_source == 'rgb':
         rgb_value = input("Please enter the RGB value (format: R,G,B, default is '255,255,255'): ") or '255,255,255'
         try:
+            with open(data_file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            data = {}
+
+        try:
             r, g, b = map(int, rgb_value.split(','))
             if all(0 <= x <= 255 for x in (r, g, b)):
-                data = {'color': f'{r},{g},{b}'}
+                data['color'] = f'{r},{g},{b}'
             else:
                 print("Error: RGB values must be between 0 and 255.")
         except ValueError:
             print("Error: Invalid RGB format. Please enter three integers separated by commas.")
 
+        with open(data_file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(data, json_file, ensure_ascii=False, indent=4)
+
     else:
         print("Error: Invalid option. Please type 'file' or 'rgb'.")
 
     gradient = input("Would you like to use gradient? (y/n), default n): ") or 'n'
+    try:
+        with open(data_file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = {}
+
     data['gradient'] = gradient
     with open(data_file_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, ensure_ascii=False, indent=4)
